@@ -1,0 +1,7 @@
+nest generate module messages : create a new module
+nest generate controller messages/messages --flat
+npm run start:dev
+
+- Decorator accessing request data : @Param() , @Query() , @Body(), @Headers()
+
+nest new di : create a new nestjs project application
