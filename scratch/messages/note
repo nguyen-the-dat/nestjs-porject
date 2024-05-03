@@ -3,5 +3,13 @@ nest generate controller messages/messages --flat
 npm run start:dev
 
 - Decorator accessing request data : @Param() , @Query() , @Body(), @Headers()
-
+npm install -g @nestjs/cli
 nest new di : create a new nestjs project application
+
+- cac cau lenh khoi tao module
+
+nest generate module users
+nest generate controller users
+nest generate service users
+npm install @nestjs/typeorm typeorm sqlite3
+    
