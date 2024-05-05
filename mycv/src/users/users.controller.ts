@@ -11,15 +11,20 @@ import {
   NotFoundException,
   UseInterceptors,
   ClassSerializerInterceptor,
+  Session,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
-//import { SerializeInterceptor } from 'src/interceptors/serialize.interceptor';
-import { Serialize } from 'src/interceptors/serialize.interceptor';
+import {
+  Serialize,
+  SerializeInterceptor,
+} from 'src/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
 import { privateDecrypt } from 'crypto';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { User } from './user.entity';
 @Controller('auth')
 @Serialize(UserDto)
 export class UsersController {
@@ -28,13 +33,48 @@ export class UsersController {
     @Inject(AuthService) private readonly authService: AuthService,
   ) {}
 
-  @Post('/signup')
-  createUser(@Body() body: CreateUserDto) {
-    return this.authService.signup(body.email, body.password);
+  // @Get('/colors/:color')
+  // setColor(@Param('color') color: string, @Session() session: any) {
+  //   session.color = color;
+  // }
+
+  // @Get('/colors')
+  // getColor(@Session() session: any) {
+  //   return session.color;
+  // }
+
+  // @Get('/whoami')
+  // whoAmI(@Session() session: any) {
+  //   return this.usersService.findUserById(session.userId);
+  // }
+
+  @Get('/whoami')
+  whoAmI(@CurrentUser() user: string) {
+    //  return this.usersService.findUserById(session.userId);
+    return user;
   }
 
-  // @UseInterceptors(new SerializeInterceptor(UserDto))
-  //@Serialize(UserDto)
+  @Post('/signup')
+  async createUser(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = await this.authService.signup(body.email, body.password);
+    session.userId = user.id;
+    return user;
+  }
+
+  @Post('/signin')
+  async signIn(@Body() body: CreateUserDto, @Session() session: any) {
+    const user = this.authService.signin(body.email, body.password);
+    session.userId = (await user).id;
+    return user;
+  }
+
+  @Post('signout')
+  signOut(@Session() session: any) {
+    session.userId = null;
+  }
+
+  @UseInterceptors(new SerializeInterceptor(UserDto))
+  // @Serialize(UserDto)
   @Get('/:id')
   async getUserById(@Param('id') id: string) {
     console.log('handler is running');
